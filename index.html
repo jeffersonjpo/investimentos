@@ -235,6 +235,39 @@ footer{text-align:center;font-size:12px;color:var(--text3);margin-top:2.5rem;pad
 .auth-err{font-size:12px;color:var(--red);min-height:16px;line-height:1.4}
 .auth-link{background:none;border:0;color:var(--blue);font-size:12px;font-family:inherit;cursor:pointer;padding:4px}
 .auth-logo{width:52px;height:52px;margin:0 auto 4px;border-radius:13px;background:#0b1410;display:flex;align-items:center;justify-content:center}
+
+/* ── DASHBOARD ── */
+.dash-wrap{max-width:1000px}
+.dash-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:1.1rem}
+.dash-chart{position:relative;height:240px}
+.dash-sub{font-size:12px;color:var(--text2);margin-bottom:.9rem}
+.hm-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hm-inner{min-width:640px}
+.hm-row{display:grid;grid-template-columns:minmax(140px,220px) 1fr 84px;gap:12px;align-items:center;padding:7px 0;border-bottom:.5px solid var(--border)}
+.hm-row:last-child{border-bottom:none}
+.hm-head{padding:0 0 6px;border-bottom:.5px solid var(--border2)}
+.hm-name{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.hm-nm{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-sub{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.hm-cells{display:grid;grid-template-columns:repeat(12,minmax(18px,1fr));gap:4px}
+.hm-c{display:block;height:22px;border-radius:5px}
+.hm-c.on{background:var(--green)}
+.hm-c.off{background:var(--surface2);box-shadow:inset 0 0 0 .5px var(--border2)}
+.hm-c.none{background:transparent}
+.hm-mh{font-size:10px;color:var(--text3);text-align:center;line-height:1.2;text-transform:uppercase;letter-spacing:.03em}
+.hm-mh small{display:block;font-size:9px;opacity:.7;text-transform:none}
+.hm-mh.cur{color:var(--text);font-weight:500}
+.hm-pct{text-align:right;line-height:1.25}
+.hm-pct b{display:block;font-size:13px;font-weight:500;color:var(--text)}
+.hm-pct b.pos{color:var(--green-text)}
+.hm-pct small{font-size:10px;color:var(--text3)}
+.hm-total{background:var(--surface2);border-radius:8px;border-bottom:none;padding:8px 8px;margin:6px -8px 0}
+.hm-tv{display:block;text-align:center;font-size:10px;color:var(--text2);line-height:22px;font-variant-numeric:tabular-nums}
+.hm-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text2);margin:2px 0 .9rem}
+.hm-legend span{display:inline-flex;align-items:center;gap:6px}
+.hm-legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.hm-legend i.blank{border:1px dashed var(--border2)}
 </style>
 
 <style>
@@ -260,7 +293,8 @@ footer{text-align:center;font-size:12px;color:var(--text3);margin-top:2.5rem;pad
   <div class="nav-inner">
     <span class="nav-brand">Controle de Investimentos</span>
     <div class="nav-menu">
-      <button class="nav-btn on" onclick="showPage('calc')">Calculadora</button>
+      <button class="nav-btn on" onclick="showPage('dash')">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('calc')">Calculadora</button>
       <button class="nav-btn" onclick="showPage('inv')">Investimentos</button>
       <button class="nav-btn" onclick="showPage('pat')">Patrimônio</button>
       <button class="nav-btn" onclick="showPage('analysis')">Análise</button>
@@ -276,7 +310,46 @@ footer{text-align:center;font-size:12px;color:var(--text3);margin-top:2.5rem;pad
 </nav>
 
 <!-- ============================================================ CALCULADORA -->
-<div id="page-calc" class="page on">
+<div id="page-dash" class="page on">
+<div class="cw dash-wrap">
+  <div style="margin-bottom:1.5rem">
+    <h2 style="font-size:20px;font-weight:500;margin-bottom:3px">Dashboard</h2>
+    <p style="font-size:13px;color:var(--text2)">Quanto foi investido, quanto voltou em proventos e como cada investimento rendeu mês a mês</p>
+  </div>
+  <div id="dash-empty" style="display:none;font-size:13px;color:var(--text3);padding:1.5rem 0;text-align:center">Nenhum investimento cadastrado ainda. Cadastre em <b>Investimentos</b> para ver o painel.</div>
+  <div id="dash-body">
+    <div class="sec-header" style="margin-top:0"><span class="sec-title">Visão geral</span></div>
+    <div class="mg" id="dash-kpi-all"></div>
+
+    <div class="sec-header"><span class="sec-title">Últimos 12 meses</span><span id="dash-range" style="font-size:11px;color:var(--text3)"></span></div>
+    <div class="mg" id="dash-kpi-12"></div>
+
+    <div class="dash-card">
+      <p class="dash-sub" style="margin-bottom:.6rem">Aportes × retornos recebidos, mês a mês</p>
+      <div class="dash-chart"><canvas id="dash-chart-monthly"></canvas></div>
+    </div>
+
+    <div class="sec-header"><span class="sec-title">Retorno recebido por investimento</span>
+      <select id="dash-sort" class="form-input" style="width:auto;font-size:12px;padding:5px 10px" onchange="renderDashboard()">
+        <option value="pct">Maior retorno % (12 meses)</option>
+        <option value="rec">Maior valor recebido (12 meses)</option>
+        <option value="az">Ordem alfabética</option>
+      </select>
+    </div>
+    <div class="dash-card">
+      <div class="hm-legend">
+        <span><i style="background:var(--green)"></i>Recebeu retorno no mês</span>
+        <span><i style="background:var(--surface2);box-shadow:inset 0 0 0 .5px var(--border2)"></i>Investimento ativo, sem retorno</span>
+        <span><i class="blank"></i>Em branco: antes do 1º aporte</span>
+      </div>
+      <div class="hm-scroll"><div class="hm-inner" id="dash-matrix"></div></div>
+      <p class="dash-sub" style="margin:.9rem 0 0;font-size:11px;color:var(--text3)">O percentual no fim de cada linha é o total recebido nos últimos 12 meses dividido pelo total aportado no investimento. Passe o mouse (ou toque) em uma célula para ver o valor do mês.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="page-calc" class="page">
 <div class="cw">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.75rem">
     <div>
@@ -863,11 +936,106 @@ const today = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.ge
 // ============================================================
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id==='page-'+id));
-  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('on', ['calc','inv','pat','analysis','favorites','fii'][i]===id));
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('on', ['dash','calc','inv','pat','analysis','favorites','fii'][i]===id));
+  if (id==='dash') renderDashboard();
   if (id==='pat') renderPatrimonio();
   if (id==='analysis') renderAnalysis();
   if (id==='favorites') renderFavorites();
   if (id==='fii') renderFII();
+}
+
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+let dCharts={monthly:null};
+function dashKeys(){
+  const d=new Date(),keys=[];
+  for(let i=11;i>=0;i--){const x=new Date(d.getFullYear(),d.getMonth()-i,1);keys.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0'));}
+  return keys;
+}
+function dashCompact(v){return v>=1000?(v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+'k':String(Math.round(v));}
+function dashPct(v){return v.toFixed(2).replace('.',',')+'%';}
+function dashRowData(inv,keys){
+  const evs=(inv.events||[]).filter(e=>e&&e.date);
+  const ap=evs.filter(e=>e.type==='aporte'),rt=evs.filter(e=>e.type==='retorno');
+  const invested=ap.reduce((s,e)=>s+(e.value||0),0);
+  const baseEvs=ap.length?ap:evs;
+  const firstKey=baseEvs.length?baseEvs.map(e=>e.date.slice(0,7)).sort()[0]:null;
+  const recBy={},apBy={};
+  rt.forEach(e=>{const k=e.date.slice(0,7);recBy[k]=(recBy[k]||0)+(e.value||0);});
+  ap.forEach(e=>{const k=e.date.slice(0,7);apBy[k]=(apBy[k]||0)+(e.value||0);});
+  const cells=keys.map(k=>{
+    if(!firstKey||k<firstKey)return{k,state:'none',v:0};
+    const v=recBy[k]||0;
+    return{k,state:v>0?'on':'off',v};
+  });
+  const rec12=keys.reduce((s,k)=>s+(recBy[k]||0),0);
+  return{inv,cells,invested,firstKey,recBy,apBy,rec12,pct:invested>0?rec12/invested*100:null};
+}
+function renderDashboard(){
+  const body=document.getElementById('dash-body'),empty=document.getElementById('dash-empty');
+  if(!body)return;
+  if(!investments.length){body.style.display='none';empty.style.display='block';return;}
+  body.style.display='';empty.style.display='none';
+  const keys=dashKeys(),rows=investments.map(i=>dashRowData(i,keys));
+  const sums=investments.map(getInvSummary);
+  const totalInv=sums.reduce((s,x)=>s+x.totalInvested,0),totalRec=sums.reduce((s,x)=>s+x.totalReceived,0);
+  const quoted=sums.filter(x=>x.currentValue!=null);
+  const curVal=quoted.reduce((s,x)=>s+x.currentValue,0),costQuoted=quoted.reduce((s,x)=>s+x.totalInvested,0);
+  const valorizPct=costQuoted>0?(curVal-costQuoted)/costQuoted*100:null;
+  // totais por mês (12 meses)
+  const monthRec=keys.map(k=>rows.reduce((s,r)=>s+(r.recBy[k]||0),0));
+  const monthAp=keys.map(k=>rows.reduce((s,r)=>s+(r.apBy[k]||0),0));
+  const rec12=monthRec.reduce((a,b)=>a+b,0),ap12=monthAp.reduce((a,b)=>a+b,0);
+  const firstAll=rows.map(r=>r.firstKey).filter(Boolean).sort()[0]||null;
+  const activeMonths=firstAll?Math.max(1,keys.filter(k=>k>=firstAll).length):1;
+  const monthsPaid=keys.filter((k,i)=>monthRec[i]>0).length;
+  let best=-1;monthRec.forEach((v,i)=>{if(v>0&&(best<0||v>monthRec[best]))best=i;});
+  const topPayer=[...rows].filter(r=>r.rec12>0).sort((a,b)=>b.rec12-a.rec12)[0];
+  const card=(l,v,s)=>`<div class="mc"><p class="ml">${l}</p><p class="mv">${v}</p><p class="ms">${s}</p></div>`;
+  document.getElementById('dash-kpi-all').innerHTML=
+    card('Total investido',fmtR(totalInv),'soma de todos os aportes')+
+    card('Total recebido',fmtR(totalRec),'soma de todos os retornos')+
+    card('Retorno acumulado',totalInv>0?dashPct(totalRec/totalInv*100):'—','recebido ÷ investido')+
+    card('Valor atual (cotação)',quoted.length?fmtR(curVal):'—',valorizPct!=null?`${valorizPct>=0?'▲':'▼'} ${dashPct(Math.abs(valorizPct))} sobre o custo dos ativos cotados`:'cadastre cotações para ver');
+  document.getElementById('dash-range').textContent=fmtMK(keys[0])+' a '+fmtMK(keys[11]);
+  document.getElementById('dash-kpi-12').innerHTML=
+    card('Recebido em 12 meses',fmtR(rec12),monthsPaid+' de '+activeMonths+(activeMonths===1?' mês com retorno':' meses com retorno'))+
+    card('Média mensal',fmtR(rec12/activeMonths),'em '+activeMonths+(activeMonths===1?' mês':' meses')+' de carteira')+
+    card('Aportado em 12 meses',fmtR(ap12),'novos aportes no período')+
+    card('Retorno em 12 meses',totalInv>0?dashPct(rec12/totalInv*100):'—','recebido 12m ÷ total investido')+
+    card('Melhor mês',best>=0?fmtR(monthRec[best]):'—',best>=0?fmtMK(keys[best]):'sem retornos no período')+
+    card('Maior pagador',topPayer?escFav(topPayer.inv.name):'—',topPayer?fmtR(topPayer.rec12)+' em 12 meses':'sem retornos no período');
+  // gráfico mensal
+  if(dCharts.monthly)dCharts.monthly.destroy();
+  dCharts.monthly=new Chart(document.getElementById('dash-chart-monthly'),{type:'bar',
+    data:{labels:keys.map(k=>fmtMK(k,true)),datasets:[
+      {label:'Aportes',data:monthAp,backgroundColor:'#378ADD',borderRadius:4},
+      {label:'Retornos recebidos',data:monthRec,backgroundColor:'#1D9E75',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:tc,font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtR(c.parsed.y)}}},
+      scales:{x:{ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{beginAtZero:true,ticks:{color:tc,font:{size:10},callback:v=>dashCompact(v)},grid:{color:gc}}}}});
+  // quadro (matriz) por investimento
+  const sort=(document.getElementById('dash-sort')||{}).value||'pct';
+  const sorted=[...rows].sort((a,b)=>{
+    if(sort==='az')return a.inv.name.localeCompare(b.inv.name,'pt-BR');
+    if(sort==='rec')return b.rec12-a.rec12||a.inv.name.localeCompare(b.inv.name,'pt-BR');
+    return (b.pct??-1)-(a.pct??-1)||a.inv.name.localeCompare(b.inv.name,'pt-BR');
+  });
+  const curKey=keys[11];
+  const head=`<div class="hm-row hm-head"><div class="hm-mh" style="text-align:left">Investimento</div><div class="hm-cells">${keys.map(k=>{const [y,m]=k.split('-');return `<div class="hm-mh${k===curKey?' cur':''}">${monthNames[+m-1]}<small>${y.slice(2)}</small></div>`}).join('')}</div><div class="hm-mh" style="text-align:right">Retorno 12m</div></div>`;
+  const body2=sorted.map(r=>{
+    const cells=r.cells.map(c=>{
+      const label=c.state==='on'?`${fmtMK(c.k)}: ${fmtR(c.v)}`:c.state==='off'?`${fmtMK(c.k)}: sem retorno`:`${fmtMK(c.k)}: antes do 1º aporte`;
+      return `<i class="hm-c ${c.state}" title="${label}" aria-label="${label}"></i>`;
+    }).join('');
+    const sub=[r.inv.ticker,INV_TYPES[r.inv.type]].filter(Boolean).join(' · ');
+    const dot=TYPE_DOT[r.inv.type]||'#9e9d98';
+    return `<div class="hm-row" data-inv="${escFav(r.inv.id)}"><div class="hm-name"><span class="hm-nm"><span class="hm-dot" style="background:${dot}"></span>${escFav(r.inv.name)}</span><span class="hm-sub">${escFav(sub)}</span></div><div class="hm-cells">${cells}</div><div class="hm-pct"><b class="${r.pct>0?'pos':''}" title="Total recebido em 12 meses ÷ total aportado">${r.pct!=null?dashPct(r.pct):'—'}</b><small>${r.rec12>0?fmtR(r.rec12):''}</small></div></div>`;
+  }).join('');
+  const total=`<div class="hm-row hm-total"><div class="hm-name"><span class="hm-nm">Total da carteira</span><span class="hm-sub">recebido por mês</span></div><div class="hm-cells">${monthRec.map((v,i)=>`<span class="hm-tv" title="${fmtMK(keys[i])}: ${fmtR(v)}">${v>0?dashCompact(v):'–'}</span>`).join('')}</div><div class="hm-pct"><b class="${rec12>0?'pos':''}">${totalInv>0?dashPct(rec12/totalInv*100):'—'}</b><small>${rec12>0?fmtR(rec12):''}</small></div></div>`;
+  document.getElementById('dash-matrix').innerHTML=head+body2+total;
 }
 
 // ============================================================
@@ -1939,6 +2107,7 @@ renderSidebar();
 renderFavorites();
 document.addEventListener('input',e=>{if(e.target.closest('#fii-strategy-edit')&&e.target.classList.contains('fii-target'))updateFiiStrategyTotal()});
 renderFII();
+renderDashboard();
 </script>
 
 <!-- SETTINGS / DATA MODAL -->
@@ -2114,7 +2283,7 @@ function rerender(){
   try{
     loadData();renderSidebar();renderFavorites();renderFII();
     const on=document.querySelector('.page.on');const id=on&&on.id.replace('page-','');
-    if(id&&['pat','analysis','favorites','fii'].includes(id))showPage(id);
+    if(id&&['dash','pat','analysis','favorites','fii'].includes(id))showPage(id);
   }catch(e){console.error('sync rerender',e);}
 }
 
