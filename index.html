@@ -82,7 +82,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .st tr.total-row td{background:var(--surface2);font-weight:500;border-top:1px solid var(--border2);border-bottom:none}
 .cur-dot{color:var(--green);font-size:10px;margin-left:3px}
 /* ── INV SIDEBAR LAYOUT ── */
-.inv-layout{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:calc(100vh - 50px)}
+.inv-layout{display:grid;grid-template-columns:276px minmax(0,1fr);min-height:calc(100vh - 50px)}
 .inv-sidebar{border-right:.5px solid var(--border);background:var(--surface);position:sticky;top:50px;height:calc(100vh - 50px);overflow-y:auto;display:flex;flex-direction:column;padding:.65rem;gap:1px;flex-shrink:0;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .inv-sidebar::-webkit-scrollbar{width:2px}
 .inv-sidebar::-webkit-scrollbar-track{background:transparent}
@@ -211,7 +211,10 @@ footer{text-align:center;font-size:12px;color:var(--text3);margin-top:2.5rem;pad
 .rh-l{left:0}.rh-r{right:0}
 .rating-val{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums;min-width:1.6em}
 .inv-item-top{display:flex;align-items:center;gap:6px;min-width:0}
-.inv-item-top .inv-item-name{flex:0 1 auto;min-width:0}
+.inv-item-top .inv-item-name{flex:1 1 auto;min-width:0;max-width:none}
+.inv-item-stars{margin-left:auto}
+.inv-item-co{font-weight:400;color:var(--text2)}
+#detail-name-input{display:none}
 .inv-item-stars{display:inline-flex;align-items:center;gap:1px;flex-shrink:0;line-height:0}
 .inv-item-stars:empty{display:none}
 
@@ -454,7 +457,9 @@ footer{text-align:center;font-size:12px;color:var(--text3);margin-top:2.5rem;pad
       <div class="inv-detail-hd">
         <div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
-            <h2 style="font-size:20px;font-weight:500" id="detail-name">—</h2>
+            <h2 style="font-size:20px;font-weight:500" id="detail-name" ondblclick="startEditName()" title="Duplo clique para renomear">—</h2>
+            <input id="detail-name-input" class="form-input" type="text" maxlength="80" autocomplete="off" aria-label="Nome do investimento" style="font-size:17px;font-weight:500;padding:4px 10px;width:min(340px,100%)" onkeydown="nameKey(event)" onblur="endEditName(true)">
+            <button class="inv-link-edit" id="detail-name-edit" type="button" onclick="startEditName()" title="Renomear investimento" aria-label="Renomear investimento">✎</button>
             <span class="rating-wrap"><span class="rating" id="detail-rating" role="slider" tabindex="0" aria-label="Qualidade do investimento (0 a 5 estrelas)" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" title="Qualidade do investimento — clique nas estrelas (meia estrela = lado esquerdo). Clique na nota atual para limpar."></span><span class="rating-val" id="detail-rating-val"></span></span>
             <select id="detail-type-sel" onchange="saveInvType()" style="appearance:none;-webkit-appearance:none;border:none;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;outline:none;transition:background .2s,color .2s">
               <option value="acoes">Ações</option>
@@ -1093,15 +1098,24 @@ updCalc();
 let investments=[], curId=null;
 let sortMode = localStorage.getItem('rp_sort') || 'az';
 
+function invLabel(inv){
+  const t=String(inv.ticker||'').trim().toUpperCase(),n=String(inv.name||'').trim();
+  if(!t)return n;if(!n||n.toUpperCase()===t)return t;return t+' ('+n+')';
+}
+function invLabelHTML(inv){
+  const t=String(inv.ticker||'').trim().toUpperCase(),n=String(inv.name||'').trim();
+  if(!t)return escFav(n);if(!n||n.toUpperCase()===t)return escFav(t);
+  return escFav(t)+' <span class="inv-item-co">('+escFav(n)+')</span>';
+}
 function getSortedInvestments() {
   const copy = [...investments];
   switch(sortMode) {
-    case 'az': return copy.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+    case 'az': return copy.sort((a,b)=>invLabel(a).localeCompare(invLabel(b),'pt-BR'));
     case 'type': return copy.sort((a,b)=>(INV_TYPES[a.type]||'').localeCompare(INV_TYPES[b.type]||'','pt-BR'));
     case 'most': return copy.sort((a,b)=>getInvSummary(b).totalInvested-getInvSummary(a).totalInvested);
     case 'least': return copy.sort((a,b)=>getInvSummary(a).totalInvested-getInvSummary(b).totalInvested);
-    case 'stars': return copy.sort((a,b)=>(getRating(b)-getRating(a))||a.name.localeCompare(b.name,'pt-BR'));
-    case 'stars-asc': return copy.sort((a,b)=>(getRating(a)-getRating(b))||a.name.localeCompare(b.name,'pt-BR'));
+    case 'stars': return copy.sort((a,b)=>(getRating(b)-getRating(a))||invLabel(a).localeCompare(invLabel(b),'pt-BR'));
+    case 'stars-asc': return copy.sort((a,b)=>(getRating(a)-getRating(b))||invLabel(a).localeCompare(invLabel(b),'pt-BR'));
     case 'newest': return copy.sort((a,b)=>Number(b.id)-Number(a.id));
     case 'oldest': return copy.sort((a,b)=>Number(a.id)-Number(b.id));
     default: return copy;
@@ -1251,7 +1265,7 @@ function renderAnalysisTable(){const sort=document.getElementById('analysis-sort
 function renderRebalance(totals,total){const t=getTargets();const keys=Object.keys({...t,...totals});document.getElementById('rebalance-body').innerHTML=keys.map(k=>{const actual=total?(totals[k]||0)/total*100:0,meta=t[k]||0,d=meta-actual,need=Math.max(0,total*d/100);return `<tr><td>${INV_TYPES[k]||k}</td><td style="text-align:right">${actual.toFixed(1).replace('.',',')}%</td><td style="text-align:right">${meta.toFixed(1).replace('.',',')}%</td><td style="text-align:right;color:${d>2?'var(--green)':d<-2?'var(--red)':'var(--text2)'}">${d>=0?'+':''}${d.toFixed(1).replace('.',',')} p.p.</td><td style="text-align:right">${need>0?fmtR(need):'—'}</td><td>${d>3?'Alta':d>1?'Média':'Normal'}</td></tr>`}).join('')}
 function renderOpportunities(sums,total){const list=[];sums.forEach(s=>{if(s.pvp!=null&&s.pvp>=0.8&&s.pvp<=1.0)list.push([s.name,'P/VP '+s.pvp.toFixed(2).replace('.',',')+' — próximo/abaixo do valor patrimonial. Analise qualidade e histórico antes de decidir.']);if(s.irr!=null&&s.irr>0)list.push([s.name,'TIR de '+fmtPct(s.irr*100,2)+' a.a. — compare com benchmark e risco da classe.']);});const t=getTargets(),{totals}=classTotals();Object.keys(t).forEach(k=>{const p=total?(totals[k]||0)/total*100:0;if((t[k]||0)-p>3)list.push([INV_TYPES[k]||k,'Classe '+((t[k]||0)-p).toFixed(1).replace('.',',')+' p.p. abaixo da meta — pode ser priorizada nos próximos aportes.'])});document.getElementById('opportunities').innerHTML=(list.slice(0,10).map(x=>`<div class="opp"><b>• ${x[0]}</b><div>${x[1]}</div></div>`).join('')||'<div class="opp"><b>Nenhuma oportunidade automática</b><div>Cadastre tickers e metas para enriquecer a análise.</div></div>')}
 function renderPortfolioMetrics(sums,invested,current,received){const avgMonths=sums.length?sums.reduce((a,s)=>a+s.months*(s.totalInvested/invested),0):0;const dy12=invested>0?sums.reduce((a,s)=>a+(s.dy||0)*((s.currentValue||s.totalInvested)/Math.max(current||invested,1)),0):0;document.getElementById('portfolio-metrics').innerHTML=[['Tempo médio',''+avgMonths.toFixed(1).replace('.',',')+' meses'],['Proventos / aportes',invested?fmtPct(received/invested*100,2):'—'],['DY ponderado',dy12?fmtPct(dy12,2):'—'],['Ativos',''+sums.length],['Dados de mercado',sums.filter(s=>s.market&&s.market.updatedAt).length+'/'+sums.length]].map(x=>`<div class="metric-mini"><p class="ml">${x[0]}</p><div class="mm">${x[1]}</div></div>`).join('')}
-function saveTicker(){const inv=getInv();if(!inv)return;inv.ticker=document.getElementById('detail-ticker').value.trim().toUpperCase();saveData();renderDetail();}
+function saveTicker(){const inv=getInv();if(!inv)return;inv.ticker=document.getElementById('detail-ticker').value.trim().toUpperCase();saveData();renderSidebar();}
 function saveBroker(){const inv=getInv();if(!inv)return;inv.broker=document.getElementById('detail-broker').value.trim();saveData();renderSidebar();}
 function extractMarket(r){
   // A API v1 normalmente devolve os indicadores no próprio objeto.
@@ -1664,7 +1678,7 @@ function renderSidebar(){
     const broker=String(inv.broker||'').trim();
     const bColor=brokerColor(broker);
     const rt=getRating(inv);
-    btn.innerHTML=`<div class="inv-item-top"><span class="inv-item-name">${inv.name}</span><span class="inv-item-stars"${rt>0?` title="Qualidade: ${fmtRating(rt)} de 5"`:''}>${rt>0?starsHTML(rt,10,false):''}</span></div>
+    btn.innerHTML=`<div class="inv-item-top"><span class="inv-item-name" title="${escFav(invLabel(inv))}">${invLabelHTML(inv)}</span><span class="inv-item-stars"${rt>0?` title="Qualidade: ${fmtRating(rt)} de 5"`:''}>${rt>0?starsHTML(rt,10,false):''}</span></div>
       <div class="inv-item-meta">
         <span style="width:5px;height:5px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>
         <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${typeLabel}${sum.totalInvested>0?' · '+fmtR(sum.totalInvested):''}${rendStr}</span>
@@ -1718,8 +1732,31 @@ function saveInvestmentLink(){
 // ============================================================
 // INVESTMENTS — DETAIL
 // ============================================================
+let nameEditing=false;
+function resetNameEdit(){
+  nameEditing=false;
+  const h=document.getElementById('detail-name'),i=document.getElementById('detail-name-input'),b=document.getElementById('detail-name-edit');
+  if(h)h.style.display='';if(i)i.style.display='none';if(b)b.style.display='';
+}
+function startEditName(){
+  const inv=getInv();if(!inv)return;
+  const h=document.getElementById('detail-name'),i=document.getElementById('detail-name-input'),b=document.getElementById('detail-name-edit');
+  i.value=inv.name;h.style.display='none';b.style.display='none';i.style.display='';nameEditing=true;i.focus();i.select();
+}
+function endEditName(save){
+  if(!nameEditing)return;
+  const inv=getInv(),i=document.getElementById('detail-name-input');
+  const n=(i.value||'').trim();
+  resetNameEdit();
+  if(save&&inv&&n&&n!==inv.name){inv.name=n;saveData();renderSidebar();}
+}
+function nameKey(e){
+  if(e.key==='Enter'){e.preventDefault();endEditName(true);}
+  else if(e.key==='Escape'){e.preventDefault();endEditName(false);}
+}
 function renderDetail(){
   const inv=getInv();if(!inv){document.getElementById('inv-detail').style.display='none';return;}
+  if(!nameEditing)resetNameEdit();
   document.getElementById('inv-detail').style.display='';
   const sum=getInvSummary(inv);
 
