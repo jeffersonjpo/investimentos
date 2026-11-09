@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>try{var __m=localStorage.getItem('rp_mobile_mode');if(__m==='on'||(__m!=='off'&&window.matchMedia&&window.matchMedia('(max-width:720px)').matches))document.documentElement.classList.add('mob')}catch(e){}</script>
 <title>Controle de Investimentos</title>
 <meta name="description" content="Controle de Investimentos — aportes, retornos, dividendos e análise da carteira em um só lugar.">
 <meta name="theme-color" content="#0b1410">
@@ -270,6 +271,102 @@ footer{text-align:center;font-size:12px;color:var(--text3);margin-top:2.5rem;pad
 .hm-legend span{display:inline-flex;align-items:center;gap:6px}
 .hm-legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
 .hm-legend i.blank{border:1px dashed var(--border2)}
+
+/* ── SELETOR DE LAYOUT (configurações) ── */
+.seg{display:flex;border:.5px solid var(--border2);border-radius:9px;overflow:hidden}
+.seg-btn{flex:1;padding:9px 6px;font:inherit;font-size:12px;background:transparent;border:0;color:var(--text2);cursor:pointer}
+.seg-btn+.seg-btn{border-left:.5px solid var(--border2)}
+.seg-btn.on{background:var(--surface2);color:var(--text);font-weight:500}
+#mob-tip{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:88vw;background:var(--text);color:var(--bg);font-size:13px;padding:9px 14px;border-radius:10px;z-index:6000;display:none;box-shadow:0 6px 24px rgba(0,0,0,.3);text-align:center}
+
+/* ══════════ MODO CELULAR (html.mob) ══════════ */
+html.mob{-webkit-text-size-adjust:100%}
+html.mob body{overflow-x:hidden}
+html.mob input,html.mob select,html.mob textarea{font-size:16px!important}
+html.mob .btn-primary,html.mob .btn-outline,html.mob .btn-danger{min-height:40px;font-size:14px}
+html.mob .sidebar-top .btn-outline,html.mob .sidebar-top .btn-primary{min-height:40px;padding:8px 14px!important;font-size:13px!important}
+/* topo: marca + ações na 1ª linha, abas roláveis na 2ª */
+html.mob .topnav{padding-top:env(safe-area-inset-top,0px)}
+html.mob .nav-inner{flex-wrap:wrap;height:auto;padding:4px max(.75rem,env(safe-area-inset-right)) 0 max(.75rem,env(safe-area-inset-left));gap:0 8px;align-items:center}
+html.mob .nav-brand{display:block;order:1;flex:1;min-width:0;font-size:14px;padding:8px 0;overflow:hidden;text-overflow:ellipsis}
+html.mob .nav-right{order:2;margin-left:auto;gap:6px}
+html.mob .nav-menu{order:3;flex:0 0 100%;position:relative;overflow-x:auto;overflow-y:hidden;gap:6px;padding:2px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html.mob .nav-menu::-webkit-scrollbar{display:none}
+html.mob .nav-btn{flex:0 0 auto;padding:9px 15px;font-size:14px;border-radius:99px;white-space:nowrap}
+html.mob .nav-settings{width:40px;height:40px;font-size:20px}
+html.mob .nav-logout{padding:8px 12px;font-size:13px}
+html.mob .sync-txt{display:none}
+html.mob .sync-badge{padding:8px}
+/* páginas */
+html.mob .cw{max-width:none;padding:1rem max(.85rem,env(safe-area-inset-left)) calc(3rem + env(safe-area-inset-bottom,0px)) max(.85rem,env(safe-area-inset-right))}
+html.mob .mg{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+html.mob .mc{padding:11px 12px}
+html.mob .mv{font-size:18px;overflow-wrap:anywhere}
+html.mob .ig,html.mob .co-wrap,html.mob .form-row-2{grid-template-columns:1fr}
+html.mob .tabs{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html.mob .tabs::-webkit-scrollbar{display:none}
+html.mob .tb{flex:0 0 auto;padding:11px 14px;white-space:nowrap}
+html.mob .sec-header{margin-top:1.25rem}
+html.mob table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+html.mob .st th,html.mob .st td{padding:9px 8px}
+/* investimentos: lista vira faixa horizontal, detalhe em coluna única */
+html.mob .inv-layout{display:block;min-height:0}
+html.mob .inv-sidebar{position:static;height:auto;max-height:none;border-right:none;border-bottom:.5px solid var(--border);flex-direction:column;flex-wrap:nowrap;overflow:visible;padding:.7rem max(.85rem,env(safe-area-inset-left)) .6rem max(.85rem,env(safe-area-inset-right));gap:8px}
+html.mob .sidebar-top{margin:0;padding:0;border-bottom:none;width:100%}
+html.mob .sidebar-title{display:block;font-size:11px}
+html.mob .inv-broker-filter{width:100%;box-sizing:border-box;min-height:40px}
+html.mob #inv-sidebar-list{display:flex!important;flex:none!important;flex-direction:row;gap:8px;position:relative;overflow-x:auto;overflow-y:hidden;padding:2px 0 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html.mob #inv-sidebar-list::-webkit-scrollbar{display:none}
+html.mob .inv-item{flex:0 0 auto;width:auto;min-height:40px;padding:8px 14px;border-radius:99px;border:.5px solid var(--border);background:var(--surface2);display:flex;align-items:center}
+html.mob .inv-item.active{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+html.mob .inv-item-name{max-width:none;font-size:13px}
+html.mob .inv-item-top{gap:8px}
+html.mob .inv-item-stars{margin-left:2px}
+html.mob .inv-item-meta,html.mob .inv-item-type-row,html.mob .sidebar-footer{display:none}
+html.mob .inv-main{padding:1rem max(.85rem,env(safe-area-inset-left)) calc(3rem + env(safe-area-inset-bottom,0px)) max(.85rem,env(safe-area-inset-right))}
+html.mob .inv-detail-hd{flex-direction:column;align-items:stretch;gap:12px}
+html.mob .inv-detail-hd>div:last-child{display:flex;gap:8px;width:100%}
+html.mob .inv-detail-hd>div:last-child>button{flex:1}
+html.mob .inv-link-wrap{flex-wrap:wrap;width:100%}
+html.mob .broker-inp{flex:1;min-width:130px;width:auto;padding:8px 12px}
+html.mob .inv-link-edit{width:36px;height:36px}
+html.mob #detail-ticker{width:120px!important;padding:8px 12px!important}
+html.mob #detail-type-sel{padding:8px 14px!important}
+html.mob .sort-opt{padding:12px;font-size:14px}
+/* dashboard */
+html.mob .dash-chart{height:210px}
+html.mob .dash-card{padding:12px}
+html.mob #dash-sort{width:100%!important}
+html.mob .hm-inner{min-width:0}
+html.mob .hm-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name pct" "cells cells";gap:8px 10px;padding:10px 0}
+html.mob .hm-row .hm-name{grid-area:name}
+html.mob .hm-row .hm-pct{grid-area:pct}
+html.mob .hm-row .hm-cells{grid-area:cells;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px}
+html.mob .hm-c{height:26px;border-radius:4px}
+html.mob .hm-head{grid-template-columns:1fr;grid-template-areas:"cells";padding:0 0 6px}
+html.mob .hm-head>.hm-mh{display:none}
+html.mob .hm-head .hm-cells{grid-area:cells}
+html.mob .hm-mh{font-size:9px}
+html.mob .hm-mh small{font-size:8px}
+html.mob .hm-total{margin:8px 0 0;padding:10px 8px}
+html.mob .hm-tv{font-size:8.5px;letter-spacing:-.02em}
+html.mob .hm-pct b{font-size:15px}
+/* análise / favoritos / FII */
+html.mob .analysis-wrap,html.mob .fav-wrap,html.mob .fii-wrap{max-width:none}
+html.mob .analysis-head,html.mob .fii-head{flex-direction:column;align-items:stretch}
+html.mob .analysis-grid,html.mob .analysis-metrics,html.mob .fii-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.mob .analysis-two,html.mob .fii-grid,html.mob .fav-layout,html.mob .fav-grid{grid-template-columns:1fr}
+html.mob .fav-sidebar{position:static;max-height:none;overflow:visible}
+html.mob .fav-personal-list{display:grid;grid-template-columns:1fr;max-height:none;overflow:visible}
+html.mob .fav-toolbar .fav-input{flex:1 1 100%;min-width:0}
+html.mob .fii-actions{width:100%}
+html.mob .fii-actions>button{flex:1}
+/* janelas viram "folhas" que sobem da base */
+html.mob .overlay{align-items:flex-end;padding:0}
+html.mob .overlay .modal{max-width:none!important;width:100%;border-radius:18px 18px 0 0;max-height:92vh;max-height:92dvh;padding:1.1rem max(1rem,env(safe-area-inset-left)) calc(1rem + env(safe-area-inset-bottom,0px)) max(1rem,env(safe-area-inset-right))}
+html.mob .modal-footer{flex-direction:column-reverse;gap:8px;margin-top:1.1rem}
+html.mob .modal-footer>*{width:100%;min-height:44px}
+html.mob .auth-overlay{align-items:flex-start;padding-top:10vh}
 </style>
 
 <style>
@@ -1177,7 +1274,7 @@ function paintStars(box,v){box.querySelectorAll('.rs').forEach((s,idx)=>{const f
 function renderRating(inv){
   const box=document.getElementById('detail-rating');if(!box)return;
   const r=getRating(inv);
-  box.innerHTML=starsHTML(r,20,true);
+  box.innerHTML=starsHTML(r,document.documentElement.classList.contains('mob')?30:20,true);
   box.setAttribute('aria-valuenow',r);
   box.setAttribute('aria-valuetext',r===0?'Sem nota':fmtRating(r)+' de 5 estrelas');
   const val=document.getElementById('detail-rating-val');
@@ -2146,7 +2243,7 @@ renderDashboard();
 </script>
 
 <!-- SETTINGS / DATA MODAL -->
-<div class="overlay" id="settings-overlay" style="display:none" onclick="closeSettings(event)"><div class="modal" style="max-width:520px;width:94vw" onclick="event.stopPropagation()"><h2>Dados e configurações</h2><p style="font-size:12px;color:var(--text2);margin-bottom:16px">Faça backup de todos os dados preenchíveis do sistema ou restaure um backup anterior.</p><div style="display:grid;gap:8px"><button class="btn-outline" onclick="exportAllData()">↓ Exportar todos os dados</button><button class="btn-outline" onclick="importClick()">↑ Importar dados</button></div><div style="margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:9px"><label for="brapi-token-input" style="display:block;font-size:11px;color:var(--text2);margin-bottom:6px">Token da brapi (cotações)</label><div style="display:flex;gap:6px"><input id="brapi-token-input" class="form-input" type="password" autocomplete="off" placeholder="Cole aqui o seu token" style="flex:1;min-width:0"><button class="btn-outline" onclick="saveBrapiToken()">Salvar</button></div><p id="brapi-token-msg" style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5">Fica salvo apenas neste navegador — não vai para o código publicado nem para o backup.</p></div><div style="margin-top:14px;padding:10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);font-size:10px;color:var(--text3);line-height:1.5">O backup inclui investimentos e lançamentos, tickets e dados de mercado salvos, Favoritos e ranking pessoal, estratégia de FII, metas, ordem da carteira e as notas (estrelas) de cada investimento. A chave da API não é exportada.</div><div class="modal-footer"><button class="btn-outline" onclick="closeSettings()">Fechar</button></div></div></div>
+<div class="overlay" id="settings-overlay" style="display:none" onclick="closeSettings(event)"><div class="modal" style="max-width:520px;width:94vw" onclick="event.stopPropagation()"><h2>Dados e configurações</h2><p style="font-size:12px;color:var(--text2);margin-bottom:16px">Faça backup de todos os dados preenchíveis do sistema ou restaure um backup anterior.</p><div style="display:grid;gap:8px"><button class="btn-outline" onclick="exportAllData()">↓ Exportar todos os dados</button><button class="btn-outline" onclick="importClick()">↑ Importar dados</button></div><div style="margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:9px"><p style="font-size:11px;color:var(--text2);margin-bottom:8px">Layout para celular</p><div class="seg" role="group" aria-label="Layout para celular"><button type="button" class="seg-btn" data-mob-mode="auto" onclick="setMobMode('auto')">Automático</button><button type="button" class="seg-btn" data-mob-mode="on" onclick="setMobMode('on')">Ligado</button><button type="button" class="seg-btn" data-mob-mode="off" onclick="setMobMode('off')">Desligado</button></div><p style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.5">Automático ativa em telas de até 720 px. “Ligado” força o layout de celular em qualquer tela. Vale só para este aparelho.</p></div><div style="margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:9px"><label for="brapi-token-input" style="display:block;font-size:11px;color:var(--text2);margin-bottom:6px">Token da brapi (cotações)</label><div style="display:flex;gap:6px"><input id="brapi-token-input" class="form-input" type="password" autocomplete="off" placeholder="Cole aqui o seu token" style="flex:1;min-width:0"><button class="btn-outline" onclick="saveBrapiToken()">Salvar</button></div><p id="brapi-token-msg" style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5">Fica salvo apenas neste navegador — não vai para o código publicado nem para o backup.</p></div><div style="margin-top:14px;padding:10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);font-size:10px;color:var(--text3);line-height:1.5">O backup inclui investimentos e lançamentos, tickets e dados de mercado salvos, Favoritos e ranking pessoal, estratégia de FII, metas, ordem da carteira e as notas (estrelas) de cada investimento. A chave da API não é exportada.</div><div class="modal-footer"><button class="btn-outline" onclick="closeSettings()">Fechar</button></div></div></div>
 
 <script>
 (function(){
@@ -2478,5 +2575,50 @@ if(!cfgOk||typeof firebase==='undefined'){
 })();
 </script>
 
+<div id="mob-tip" role="status"></div>
+<script>
+// ============================================================
+// MODO CELULAR — Automático / Ligado / Desligado (por aparelho)
+// ============================================================
+(function(){
+  const KEY='rp_mobile_mode',root=document.documentElement;
+  const mq=window.matchMedia?window.matchMedia('(max-width:720px)'):null;
+  const mode=()=>{try{const v=localStorage.getItem(KEY);return v==='on'||v==='off'?v:'auto';}catch(e){return 'auto';}};
+  const want=()=>{const m=mode();return m==='on'?true:m==='off'?false:!!(mq&&mq.matches);};
+  const isMob=()=>root.classList.contains('mob');
+  function centerIn(box,el){if(!box||!el)return;box.scrollTo?box.scrollTo({left:Math.max(0,el.offsetLeft-(box.clientWidth-el.offsetWidth)/2)}):0;}
+  function scrollActive(){
+    centerIn(document.querySelector('.nav-menu'),document.querySelector('.nav-btn.on'));
+    centerIn(document.getElementById('inv-sidebar-list'),document.querySelector('.inv-item.active'));
+  }
+  function paint(){
+    const m=mode();
+    document.querySelectorAll('[data-mob-mode]').forEach(b=>{const on=b.dataset.mobMode===m;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));});
+  }
+  function apply(){
+    const was=isMob(),now=want();
+    root.classList.toggle('mob',now);paint();
+    if(was!==now){try{const inv=getInv();if(inv)renderRating(inv);}catch(e){}}
+    if(now)scrollActive();
+  }
+  window.setMobMode=function(m){try{localStorage.setItem(KEY,m);}catch(e){}apply();};
+  window.addEventListener('resize',apply,{passive:true});
+  window.addEventListener('orientationchange',apply);
+  if(mq&&mq.addEventListener)mq.addEventListener('change',apply);
+  // mantém a aba ativa e o investimento selecionado à vista nas faixas roláveis
+  const _sp=showPage;showPage=function(){const r=_sp.apply(this,arguments);if(isMob())scrollActive();return r;};
+  const _rs=renderSidebar;renderSidebar=function(){const r=_rs.apply(this,arguments);if(isMob())scrollActive();return r;};
+  document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>{if(isMob())window.scrollTo(0,0);}));
+  // sem "hover" no toque: tocar numa célula do quadro mostra o valor
+  let tipT=null;
+  document.addEventListener('click',e=>{
+    if(!isMob())return;
+    const c=e.target.closest&&e.target.closest('.hm-c,.hm-tv');if(!c||!c.title)return;
+    const tip=document.getElementById('mob-tip');tip.textContent=c.title;tip.style.display='block';
+    clearTimeout(tipT);tipT=setTimeout(()=>{tip.style.display='none';},2400);
+  });
+  apply();
+})();
+</script>
 </body>
 </html>
